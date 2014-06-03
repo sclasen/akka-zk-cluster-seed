@@ -11,7 +11,7 @@ use
 ---
 
 Add the folowing dependency to your project. `akka-zk-cluster-seed` is built with akka dependcies marked as provided, so it should work with
-a reasonable range of akka versions configured in your build.sbt/
+a reasonable range of akka versions configured in your build.sbt.
 
 ```scala
 libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.0.1"
