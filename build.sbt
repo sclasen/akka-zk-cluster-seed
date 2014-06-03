@@ -8,9 +8,11 @@ organization := "com.sclasen"
 
 name := "akka-zk-cluster-seed"
 
-version := "0.0.3"
+version := "0.0.4"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.1"
+
+crossScalaVersions := Seq("2.11.1", "2.10.4")
 
 parallelExecution in Test := false
 
@@ -75,9 +77,9 @@ def rootProject = Project("akka-zk-cluster-seed", file("."))
   .configs(IntegrationTest, MultiJvm)
 
 def akkaDependencies = Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.3.2" % "provided",
-  "com.typesafe.akka" %% "akka-cluster" % "2.3.2" % "provided",
-  "com.typesafe.akka" %% "akka-slf4j" % "2.3.2" % "provided",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.3" % "provided",
+  "com.typesafe.akka" %% "akka-cluster" % "2.3.3" % "provided",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.3.3" % "provided",
   "org.slf4j" % "log4j-over-slf4j" % "1.6.6" % "provided",
   "ch.qos.logback" % "logback-classic" % "1.1.2"  % "provided"
 )

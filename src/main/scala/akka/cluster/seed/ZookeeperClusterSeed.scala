@@ -47,7 +47,6 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   }
 
   def join() = {
-
     createPathIfNeeded()
     latch.start()
     val leaderId = latch.getLeader.getId
