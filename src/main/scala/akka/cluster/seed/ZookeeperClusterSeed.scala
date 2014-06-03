@@ -8,6 +8,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry
 import akka.remote.RemoteActorRefProvider
 import org.apache.curator.framework.recipes.leader.LeaderLatch
 import scala.collection.immutable
+import org.apache.zookeeper.KeeperException.NodeExistsException
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
 
@@ -47,7 +48,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   def join() = {
 
-    Option(client.checkExists().forPath(path)).getOrElse(client.create().creatingParentsIfNeeded().forPath(path))
+    createPathIfNeeded()
     latch.start()
     val leaderId = latch.getLeader.getId
     if (leaderId == myId) {
@@ -57,6 +58,16 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
       val leader = AddressFromURIString(s"akka.tcp://${leaderId}")
       system.log.warning("component=zookeeper-cluster-seed at=join-cluster leader={}", leader)
       Cluster(system).joinSeedNodes(immutable.Seq(leader))
+    }
+  }
+
+  def createPathIfNeeded() {
+    Option(client.checkExists().forPath(path)).getOrElse {
+      try {
+        client.create().creatingParentsIfNeeded().forPath(path)
+      } catch {
+        case e: NodeExistsException => system.log.info("component=zookeeper-cluster-seed at=path-create-race-detected")
+      }
     }
   }
 

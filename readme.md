@@ -14,7 +14,7 @@ Add the folowing dependency to your project. `akka-zk-cluster-seed` is built wit
 a reasonable range of akka versions configured in your build.sbt.
 
 ```scala
-libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.0.2"
+libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.0.3"
 ```
 
 When starting your app, use the `ZookeeperClusterSeed` extension, instead of the `Cluster` extension to join your cluster.
