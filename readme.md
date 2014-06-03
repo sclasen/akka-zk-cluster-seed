@@ -10,7 +10,7 @@ Assuming you already have easy access to a zookeeper cluster.
 use
 ---
 
-Add the folowing dependency to your project. `akka-zk-cluster-seed` is built with akka dependcies marked as provided, so it should work with
+Add the folowing dependency to your project. `akka-zk-cluster-seed` is built with akka dependencies marked as provided, so it should work with
 a reasonable range of akka versions configured in your build.sbt.
 
 ```scala
