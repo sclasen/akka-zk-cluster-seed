@@ -8,7 +8,7 @@ organization := "com.sclasen"
 
 name := "akka-zk-cluster-seed"
 
-version := "0.0.4"
+version := "0.0.5"
 
 scalaVersion := "2.11.1"
 
@@ -85,8 +85,8 @@ def akkaDependencies = Seq(
 )
 
 def zkDependencies = Seq(
-  "org.apache.curator" % "curator-framework" % "2.5.0",
-  "org.apache.curator" % "curator-recipes" % "2.5.0"
+  "org.apache.curator" % "curator-framework" % "2.5.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12"),
+  "org.apache.curator" % "curator-recipes" % "2.5.0"  exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
 )
 
 def testDependencies = Seq(
