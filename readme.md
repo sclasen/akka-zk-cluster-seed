@@ -11,7 +11,8 @@ use
 ---
 
 Add the folowing dependency to your project. `akka-zk-cluster-seed` is built with akka dependencies marked as provided, so it should work with
-a reasonable range of akka versions configured in your build.sbt.
+a reasonable range of akka versions configured in your build.sbt. Note that you must also have `spray 1.3.X and spray-json as dependencies in your
+project if you want to use the neftlix exhibitor integration described below.
 
 ```scala
 libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.0.3"
@@ -41,6 +42,22 @@ akka.cluster.seed.zookeeper {
 }
 
 ```
+
+`netfix exhibitor` integration: if you want to use netflix exhibitor to discover your zookeeper servers, you should configure like so.
+
+
+```
+// application.conf
+akka.cluster.seed.zookeeper {
+    path = "/akka/cluster/seed"
+    exhibitor {
+        url = "https://user:pass@host:port
+        validate-certs = true|false
+    }
+}
+
+```
+
 
 details
 -------

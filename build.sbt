@@ -8,7 +8,7 @@ organization := "com.sclasen"
 
 name := "akka-zk-cluster-seed"
 
-version := "0.0.5"
+version := "0.0.6-SNAPSHOT"
 
 scalaVersion := "2.11.1"
 
@@ -60,6 +60,7 @@ def rootProject = Project("akka-zk-cluster-seed", file("."))
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.6", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
     javacOptions in Compile ++= Seq("-source", "1.6", "-target", "1.6", "-Xlint:unchecked", "-Xlint:deprecation")
   )
+  .settings(spray:_*)
   .settings(Defaults.itSettings:_*)
   .settings(SbtMultiJvm.multiJvmSettings:_*)
   .settings(compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in IntegrationTest))
@@ -81,7 +82,8 @@ def akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-cluster" % "2.3.3" % "provided",
   "com.typesafe.akka" %% "akka-slf4j" % "2.3.3" % "provided",
   "org.slf4j" % "log4j-over-slf4j" % "1.6.6" % "provided",
-  "ch.qos.logback" % "logback-classic" % "1.1.2"  % "provided"
+  "ch.qos.logback" % "logback-classic" % "1.1.2"  % "provided",
+  "io.spray" %% "spray-json" % "1.2.6" % "provided"
 )
 
 def zkDependencies = Seq(
@@ -90,13 +92,21 @@ def zkDependencies = Seq(
 )
 
 def testDependencies = Seq(
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.2" % "test,it,multi-jvm",
-  "com.typesafe.akka" %% "akka-actor" % "2.3.2" % "test,it,multi-jvm",
-  "com.typesafe.akka" %% "akka-cluster" % "2.3.2" % "test,it,multi-jvm",
+  "com.typesafe.akka" %% "akka-testkit" % "2.3.3" % "test,it,multi-jvm",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.3" % "test,it,multi-jvm",
+  "com.typesafe.akka" %% "akka-cluster" % "2.3.3" % "test,it,multi-jvm",
   "org.scalatest" %% "scalatest" % "2.1.6" % "test,it,multi-jvm",
-  "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.3.2" % "test,it,multi-jvm"
+  "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.3.3" % "test,it,multi-jvm"
 )
 
+
+
+def spray:Seq[Setting[Seq[ModuleID]]] = Seq(libraryDependencies <+= scalaVersion(sprayDependency(_)))
+
+def sprayDependency(scalaVersion: String) = scalaVersion match {
+  case "2.10.4" => "io.spray" % "spray-client" % "1.3.1" % "provided"
+  case "2.11.1" => "io.spray" % "spray-client_2.11" % "1.3.1-20140423" % "provided"
+}
 // needs to come after all dependencies
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
