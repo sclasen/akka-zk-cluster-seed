@@ -57,7 +57,7 @@ val root = rootProject
 def rootProject = Project("akka-zk-cluster-seed", file("."))
   .settings(Project.defaultSettings:_*)
   .settings(
-    scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.6", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint"),
+    scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.6", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
     javacOptions in Compile ++= Seq("-source", "1.6", "-target", "1.6", "-Xlint:unchecked", "-Xlint:deprecation")
   )
   .settings(spray:_*)
@@ -96,7 +96,10 @@ def testDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.3.3" % "test,it,multi-jvm",
   "com.typesafe.akka" %% "akka-cluster" % "2.3.3" % "test,it,multi-jvm",
   "org.scalatest" %% "scalatest" % "2.1.6" % "test,it,multi-jvm",
-  "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.3.3" % "test,it,multi-jvm"
+  "com.typesafe.akka" %% "akka-multi-node-testkit" % "2.3.3" % "test,it,multi-jvm",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.3.3" % "test,it,multi-jvm",
+  "org.slf4j" % "log4j-over-slf4j" % "1.6.6" % "test,it,multi-jvm",
+  "ch.qos.logback" % "logback-classic" % "1.1.2"  % "test,it,multi-jvm"
 )
 
 

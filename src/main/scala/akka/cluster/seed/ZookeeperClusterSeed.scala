@@ -1,7 +1,6 @@
 package akka.cluster.seed
 
 import akka.actor._
-import com.typesafe.config.Config
 import akka.cluster.Cluster
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -9,6 +8,8 @@ import akka.remote.RemoteActorRefProvider
 import org.apache.curator.framework.recipes.leader.LeaderLatch
 import scala.collection.immutable
 import org.apache.zookeeper.KeeperException.NodeExistsException
+import concurrent.duration._
+import concurrent.Await
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
 
@@ -21,7 +22,7 @@ object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with Exten
 
 class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
-  val settings = new ZookeeperClusterSeedSettings(system.settings.config, system.name)
+  val settings = new ZookeeperClusterSeedSettings(system)
 
   val address = system.provider match {
     case rarp: RemoteActorRefProvider => rarp.transport.defaultAddress
@@ -71,11 +72,15 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   }
 
 }
-class ZookeeperClusterSeedSettings(config: Config, name: String) {
+class ZookeeperClusterSeedSettings(system: ActorSystem) {
 
-  private val zc = config.getConfig("akka.cluster.seed.zookeeper")
+  private val zc = system.settings.config.getConfig("akka.cluster.seed.zookeeper")
 
-  val ZKUrl = zc.getString("url")
+  val ZKUrl = if (zc.hasPath("exhibitor.url")) {
+    val validate = zc.getBoolean("exhibitor.validate-certs")
+    val exhibitorUrl = zc.getString("exhibitor.url")
+    Await.result(ExhibitorClient(system, exhibitorUrl, validate).getZookeepers(), 10 seconds)
+  } else zc.getString("url")
 
   val ZKPath = zc.getString("path")
 
