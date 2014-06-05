@@ -63,12 +63,14 @@ trait Client {
 
   implicit val t = Timeout(10 seconds)
 
+  def port = if (url.getPort == -1) url.getDefaultPort else url.getPort
+
   def pipeline[T](req: HttpRequest)(t: HttpResponse => T): Future[T] = connection.flatMap(_.apply(creds(req))).map(t)
 
   def creds(req: HttpRequest): HttpRequest = req.copy(headers = req.headers ++ List(Authorization(BasicHttpCredentials(creds(0), creds(1)))))
 
   def connection: Future[SendReceive] = {
-    (IO(Http) ? HostConnectorSetup(host = url.getHost, port = 443, sslEncryption = true)).map {
+    (IO(Http) ? HostConnectorSetup(host = url.getHost, port = port, sslEncryption = url.getProtocol == "https")).map {
       case Http.HostConnectorInfo(hostConnector, _) => sendReceive(hostConnector)
     }
   }
