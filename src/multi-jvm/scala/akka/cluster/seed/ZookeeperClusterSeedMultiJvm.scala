@@ -9,7 +9,7 @@ import com.typesafe.config.{ConfigFactory, Config}
 import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
 import akka.cluster.Cluster
 import scala.language.postfixOps
-import scala.util.Properties
+import scala.util.{Random, Properties}
 import akka.cluster.ClusterEvent.MemberUp
 import akka.cluster.seed.ZookeeperClusterSeed
 import concurrent.duration._
@@ -62,6 +62,7 @@ with ScalaTestMultiNodeSpec with ImplicitSender {
     "bootstrap a cluster properly" in {
       Cluster(system).subscribe(testActor, classOf[MemberUp])
       expectMsgClass(classOf[CurrentClusterState])
+      Thread.sleep(Random.nextInt(1000))  //add some randomenss to when the joins happen
       ZookeeperClusterSeed(system).join()
       expectMsgClass(10 seconds, classOf[MemberUp])
       expectMsgClass(classOf[MemberUp])

@@ -4,12 +4,12 @@ import akka.actor._
 import akka.cluster.Cluster
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
-import akka.remote.RemoteActorRefProvider
 import org.apache.curator.framework.recipes.leader.LeaderLatch
 import scala.collection.immutable
 import org.apache.zookeeper.KeeperException.NodeExistsException
 import concurrent.duration._
 import concurrent.Await
+import collection.JavaConverters._
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
 
@@ -24,12 +24,9 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val settings = new ZookeeperClusterSeedSettings(system)
 
-  val address = system.provider match {
-    case rarp: RemoteActorRefProvider => rarp.transport.defaultAddress
-    case _ => system.provider.rootPath.address
-  }
+  val address = Cluster(system).selfAddress
 
-  val client = {
+  private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
     val client = CuratorFrameworkFactory.newClient(settings.ZKUrl, retryPolicy)
     client.start()
@@ -40,7 +37,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val path = s"${settings.ZKPath}/${system.name}"
 
-  val latch = new LeaderLatch(client, path, myId)
+  private val latch = new LeaderLatch(client, path, myId)
 
   system.registerOnTermination {
     latch.close()
@@ -50,18 +47,30 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   def join() = {
     createPathIfNeeded()
     latch.start()
-    val leaderId = latch.getLeader.getId
-    if (leaderId == myId) {
-      system.log.warning("component=zookeeper-cluster-seed at=this-node-is-leader-seed id={}", myId)
-      Cluster(system).join(address)
-    } else {
-      val leader = AddressFromURIString(s"akka.tcp://${leaderId}")
-      system.log.warning("component=zookeeper-cluster-seed at=join-cluster leader={}", leader)
-      Cluster(system).joinSeedNodes(immutable.Seq(leader))
+    while (!tryJoin()) {
+      system.log.error("component=zookeeper-cluster-seed at=try-join-failed id={}", myId)
+      Thread.sleep(1000)
     }
   }
 
-  def createPathIfNeeded() {
+  private def tryJoin(): Boolean = {
+    val leadParticipant = latch.getLeader
+    if (!leadParticipant.isLeader) false
+    else if (leadParticipant.getId == myId) {
+      system.log.warning("component=zookeeper-cluster-seed at=this-node-is-leader-seed id={}", myId)
+      Cluster(system).join(address)
+      true
+    } else {
+      val seeds = latch.getParticipants.iterator().asScala.map {
+        node => AddressFromURIString(s"akka.tcp://${node.getId}")
+      }.toList
+      system.log.warning("component=zookeeper-cluster-seed at=join-cluster seeds={}", seeds)
+      Cluster(system).joinSeedNodes(immutable.Seq(seeds: _*))
+      true
+    }
+  }
+
+  private def createPathIfNeeded() {
     Option(client.checkExists().forPath(path)).getOrElse {
       try {
         client.create().creatingParentsIfNeeded().forPath(path)
