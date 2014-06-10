@@ -8,7 +8,7 @@ organization := "com.sclasen"
 
 name := "akka-zk-cluster-seed"
 
-version := "0.0.9-SNAPSHOT"
+version := "0.0.9"
 
 scalaVersion := "2.11.1"
 
