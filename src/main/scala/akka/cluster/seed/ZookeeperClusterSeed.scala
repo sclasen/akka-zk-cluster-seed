@@ -44,7 +44,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     client.close()
   }
 
-  def join() = {
+  def join(): Unit = {
     createPathIfNeeded()
     latch.start()
     while (!tryJoin()) {
@@ -61,7 +61,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
       Cluster(system).join(address)
       true
     } else {
-      val seeds = latch.getParticipants.iterator().asScala.map {
+      val seeds = latch.getParticipants.iterator().asScala.filterNot(_.getId == myId).map {
         node => AddressFromURIString(s"akka.tcp://${node.getId}")
       }.toList
       system.log.warning("component=zookeeper-cluster-seed at=join-cluster seeds={}", seeds)
@@ -81,6 +81,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   }
 
 }
+
 class ZookeeperClusterSeedSettings(system: ActorSystem) {
 
   private val zc = system.settings.config.getConfig("akka.cluster.seed.zookeeper")
