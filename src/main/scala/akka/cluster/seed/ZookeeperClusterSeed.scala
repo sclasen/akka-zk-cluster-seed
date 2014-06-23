@@ -40,8 +40,9 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   private val latch = new LeaderLatch(client, path, myId)
 
   system.registerOnTermination {
-    latch.close()
-    client.close()
+    import scala.util.control.Exception._
+    ignoring(classOf[IllegalActorStateException]) { latch.close() }
+    ignoring(classOf[IllegalActorStateException]) { client.close() }
   }
 
   def join(): Unit = {
