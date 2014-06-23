@@ -41,8 +41,8 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   system.registerOnTermination {
     import scala.util.control.Exception._
-    ignoring(classOf[IllegalActorStateException]) { latch.close() }
-    ignoring(classOf[IllegalActorStateException]) { client.close() }
+    ignoring(classOf[IllegalStateException]) { latch.close() }
+    ignoring(classOf[IllegalStateException]) { client.close() }
   }
 
   def join(): Unit = {
