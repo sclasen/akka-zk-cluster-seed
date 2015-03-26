@@ -28,7 +28,17 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
-    val client = CuratorFrameworkFactory.newClient(settings.ZKUrl, retryPolicy)
+    val curatorBuilder = CuratorFrameworkFactory.builder()
+      .connectString(settings.ZKUrl)
+      .retryPolicy(retryPolicy)
+
+    settings.ZKAuthorization match {
+      case Some((scheme, auth)) => curatorBuilder.authorization(scheme, auth.getBytes)
+      case None =>
+    }
+
+    val client = curatorBuilder.build()
+
     client.start()
     client
   }
@@ -94,5 +104,9 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
   } else zc.getString("url")
 
   val ZKPath = zc.getString("path")
+
+  val ZKAuthorization: Option[(String, String)] = if (zc.hasPath("authorization.scheme") && zc.hasPath("authorization.auth"))
+    Some((zc.getString("authorization.scheme"), zc.getString("authorization.auth")))
+  else None
 
 }
