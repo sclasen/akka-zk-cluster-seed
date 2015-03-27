@@ -58,6 +58,19 @@ akka.cluster.seed.zookeeper {
 
 ```
 
+If your zookeeper path requires authorization you have to specify additional `authorization` section:
+
+
+```
+// application.conf
+akka.cluster.seed.zookeeper {
+    authorization {
+        scheme = "digest"
+        auth = "username:secret"
+    }
+}
+``` 
+
 
 details
 -------
