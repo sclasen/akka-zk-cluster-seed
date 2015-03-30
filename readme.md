@@ -15,7 +15,7 @@ a reasonable range of akka versions configured in your build.sbt. Note that you 
 project if you want to use the neftlix exhibitor integration described below.
 
 ```scala
-libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.0.6"
+libraryDependencies += "com.sclasen" %% "akka-zk-cluster-seed" % "0.1.2"
 ```
 
 When starting your app, use the `ZookeeperClusterSeed` extension, instead of the `Cluster` extension to join your cluster.
