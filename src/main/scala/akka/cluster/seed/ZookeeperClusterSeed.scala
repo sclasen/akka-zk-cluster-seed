@@ -20,11 +20,13 @@ object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with Exten
   override def lookup() = ZookeeperClusterSeed
 }
 
-class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
+class ZookeeperClusterSeed(system: ExtendedActorSystem, host: Option[String], port: Option[Int]) extends Extension {
+  def this(system: ExtendedActorSystem) = this(system, None, None)
 
   val settings = new ZookeeperClusterSeedSettings(system)
 
-  val address = Cluster(system).selfAddress
+  val selfAddress = Cluster(system).selfAddress
+  val address = selfAddress.copy(host = Some(host.getOrElse(selfAddress.host.get)), port = Some(port.getOrElse(selfAddress.port.get)))
 
   private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
@@ -51,8 +53,12 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   system.registerOnTermination {
     import scala.util.control.Exception._
-    ignoring(classOf[IllegalStateException]) { latch.close() }
-    ignoring(classOf[IllegalStateException]) { client.close() }
+    ignoring(classOf[IllegalStateException]) {
+      latch.close()
+    }
+    ignoring(classOf[IllegalStateException]) {
+      client.close()
+    }
   }
 
   def join(): Unit = {
