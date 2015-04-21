@@ -108,7 +108,8 @@ def spray:Seq[Setting[Seq[ModuleID]]] = Seq(libraryDependencies <+= scalaVersion
 
 def sprayDependency(scalaVersion: String) = scalaVersion match {
   case "2.10.4" => "io.spray" % "spray-client" % "1.3.1" % "provided"
-  case "2.11.1" => "io.spray" % "spray-client_2.11" % "1.3.1-20140423" % "provided"
+  case "2.11.1" => "io.spray" % "spray-client_2.11" % "1.3.1" % "provided"
+//    case "2.11.1" => "io.spray" % "spray-client_2.11" % "1.3.1-20140423" % "provided"
 }
 // needs to come after all dependencies
 
