@@ -20,13 +20,15 @@ object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with Exten
   override def lookup() = ZookeeperClusterSeed
 }
 
-class ZookeeperClusterSeed(system: ExtendedActorSystem, host: Option[String], port: Option[Int]) extends Extension {
-  def this(system: ExtendedActorSystem) = this(system, None, None)
+class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val settings = new ZookeeperClusterSeedSettings(system)
 
   val selfAddress = Cluster(system).selfAddress
-  val address = selfAddress.copy(host = Some(host.getOrElse(selfAddress.host.get)), port = Some(port.getOrElse(selfAddress.port.get)))
+  val address = if (settings.host.nonEmpty && settings.port.nonEmpty)
+    selfAddress.copy(host = settings.host, port = settings.port)
+  else
+    Cluster(system).selfAddress
 
   private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
@@ -114,5 +116,13 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
   val ZKAuthorization: Option[(String, String)] = if (zc.hasPath("authorization.scheme") && zc.hasPath("authorization.auth"))
     Some((zc.getString("authorization.scheme"), zc.getString("authorization.auth")))
   else None
+
+  val host: Option[String] = if (zc.hasPath("host_env_var") && sys.env(zc.getString("host_env_var")).nonEmpty) {
+    Some(sys.env(zc.getString("host_env_var")))
+  } else None
+
+  val port: Option[Int] = if (zc.hasPath("port_env_var") && sys.env(zc.getString("port_env_var")).nonEmpty) {
+    Some(Integer.parseInt(sys.env(zc.getString("port_env_var"))))
+  } else None
 
 }
