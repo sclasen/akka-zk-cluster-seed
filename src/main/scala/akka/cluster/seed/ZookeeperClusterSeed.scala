@@ -24,7 +24,12 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val settings = new ZookeeperClusterSeedSettings(system)
 
-  val address = Cluster(system).selfAddress
+  val selfAddress = Cluster(system).selfAddress
+  val address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
+    system.log.info(s"host:port read from environment variables=${settings.host}:${settings.port}")
+    selfAddress.copy(host = settings.host, port = settings.port)
+  } else
+    Cluster(system).selfAddress
 
   private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
@@ -51,8 +56,12 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   system.registerOnTermination {
     import scala.util.control.Exception._
-    ignoring(classOf[IllegalStateException]) { latch.close() }
-    ignoring(classOf[IllegalStateException]) { client.close() }
+    ignoring(classOf[IllegalStateException]) {
+      latch.close()
+    }
+    ignoring(classOf[IllegalStateException]) {
+      client.close()
+    }
   }
 
   def join(): Unit = {
@@ -107,6 +116,14 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
 
   val ZKAuthorization: Option[(String, String)] = if (zc.hasPath("authorization.scheme") && zc.hasPath("authorization.auth"))
     Some((zc.getString("authorization.scheme"), zc.getString("authorization.auth")))
+  else None
+
+  val host: Option[String] = if (zc.hasPath("host_env_var"))
+    Some(zc.getString("host_env_var"))
+  else None
+
+  val port: Option[Int] = if (zc.hasPath("port_env_var"))
+    Some(zc.getInt("port_env_var"))
   else None
 
 }

@@ -69,7 +69,7 @@ akka.cluster.seed.zookeeper {
         auth = "username:secret"
     }
 }
-``` 
+```
 
 
 details
@@ -80,3 +80,16 @@ It uses the curator `LeaderLatch` to elect a node to serve as a seed node. The l
 other nodes `joinSeedNodes` using the current leader as the seed.  If the leader goes offline, a new leader is elected to be the seed.
 
 
+If you need to use other hostname & port you may configure the _name_ of the environment variables to retrieve these values from.
+This might be handy to use with docker containers
+
+
+```
+// reference.conf
+akka.cluster.seed.zookeeper {
+    url = "127.0.0.1:2181"
+    path = "/akka/cluster/seed"
+    host_env_var = ${?HOST}
+    port_env_var = ${?PORT_8080}
+}
+```
