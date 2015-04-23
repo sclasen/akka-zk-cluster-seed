@@ -89,7 +89,7 @@ This might be handy to use with docker containers
 akka.cluster.seed.zookeeper {
     url = "127.0.0.1:2181"
     path = "/akka/cluster/seed"
-    host_env_var ="EXTERNAL_HOST"
-    port_env_var ="EXTERNAL_PORT"
+    host_env_var = ${?HOST}
+    port_env_var = ${?PORT_8080}
 }
 ```

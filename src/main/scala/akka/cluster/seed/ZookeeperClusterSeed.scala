@@ -25,9 +25,10 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   val settings = new ZookeeperClusterSeedSettings(system)
 
   val selfAddress = Cluster(system).selfAddress
-  val address = if (settings.host.nonEmpty && settings.port.nonEmpty)
+  val address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
+    system.log.info(s"host:port read from environment variables=${settings.host}:${settings.port}")
     selfAddress.copy(host = settings.host, port = settings.port)
-  else
+  } else
     Cluster(system).selfAddress
 
   private val client = {
@@ -117,12 +118,12 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
     Some((zc.getString("authorization.scheme"), zc.getString("authorization.auth")))
   else None
 
-  val host: Option[String] = if (zc.hasPath("host_env_var") && sys.env(zc.getString("host_env_var")).nonEmpty) {
-    Some(sys.env(zc.getString("host_env_var")))
-  } else None
+  val host: Option[String] = if (zc.hasPath("host_env_var"))
+    Some(zc.getString("host_env_var"))
+  else None
 
-  val port: Option[Int] = if (zc.hasPath("port_env_var") && sys.env(zc.getString("port_env_var")).nonEmpty) {
-    Some(Integer.parseInt(sys.env(zc.getString("port_env_var"))))
-  } else None
+  val port: Option[Int] = if (zc.hasPath("port_env_var"))
+    Some(zc.getInt("port_env_var"))
+  else None
 
 }
