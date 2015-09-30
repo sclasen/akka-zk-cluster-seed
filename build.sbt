@@ -10,9 +10,9 @@ name := "akka-zk-cluster-seed"
 
 version := "0.1.4-SNAPSHOT"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
-crossScalaVersions := Seq("2.11.6", "2.10.4")
+crossScalaVersions := Seq("2.11.7", "2.10.4")
 
 parallelExecution in Test := false
 
@@ -77,7 +77,7 @@ def rootProject = Project("akka-zk-cluster-seed", file("."))
  })
   .configs(IntegrationTest, MultiJvm)
 
-val akkaVersion           = "2.3.9"
+val akkaVersion           = "2.4.0"
 
 def akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion % "provided",
@@ -90,8 +90,8 @@ def akkaDependencies = Seq(
 )
 
 def zkDependencies = Seq(
-  "org.apache.curator" % "curator-framework" % "2.5.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12"),
-  "org.apache.curator" % "curator-recipes" % "2.5.0"  exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
+  "org.apache.curator" % "curator-framework" % "2.8.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12"),
+  "org.apache.curator" % "curator-recipes" % "2.8.0"  exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
 )
 
 def testDependencies = Seq(
