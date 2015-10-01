@@ -8,7 +8,7 @@ import org.apache.curator.framework.recipes.leader.LeaderLatch
 import scala.collection.immutable
 import org.apache.zookeeper.KeeperException.NodeExistsException
 import concurrent.duration._
-import concurrent.Await
+import scala.concurrent._
 import collection.JavaConverters._
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
@@ -87,7 +87,14 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
       }.toList
       system.log.warning("component=zookeeper-cluster-seed at=join-cluster seeds={}", seeds)
       Cluster(system).joinSeedNodes(immutable.Seq(seeds: _*))
-      true
+
+      val joined = Promise[Boolean]()
+
+      Cluster(system).registerOnMemberUp {
+        joined.trySuccess(true)
+      }
+
+      return Await.result(joined.future, 10.seconds)
     }
   }
 
