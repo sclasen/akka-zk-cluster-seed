@@ -33,8 +33,13 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   private val client = {
     val retryPolicy = new ExponentialBackoffRetry(1000, 3)
+    val connStr = if (settings.ZKUrl.startsWith("zk://")) {
+      settings.ZKUrl.substring("zk://".length)
+    } else {
+      settings.ZKUrl
+    }
     val curatorBuilder = CuratorFrameworkFactory.builder()
-      .connectString(settings.ZKUrl)
+      .connectString(connStr)
       .retryPolicy(retryPolicy)
 
     settings.ZKAuthorization match {
