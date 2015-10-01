@@ -94,7 +94,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
         joined.trySuccess(true)
       }
 
-      return Await.result(joined.future, 10.seconds)
+      Await.result(joined.future, 10.seconds)
     }
   }
 
