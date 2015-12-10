@@ -17,7 +17,7 @@ class ExhibitorClientSpec extends WordSpec with MustMatchers with BeforeAndAfter
 
   "ExhibitorClient" must {
     "read the zookeepers from exhibitor" in {
-      val zks = ExhibitorClient(system, sys.env("EXHIBITOR_URL"), false).getZookeepers(Some("chroot")).futureValue
+      val zks = ExhibitorClient(system, sys.env("EXHIBITOR_URL"), "/exhibitor/v1/cluster/list", false).getZookeepers(Some("chroot")).futureValue
       zks must endWith("/chroot")
       zks must not startWith("/chroot")
     }
