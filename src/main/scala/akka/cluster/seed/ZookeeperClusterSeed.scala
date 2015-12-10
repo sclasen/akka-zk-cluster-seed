@@ -117,7 +117,8 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
   val ZKUrl = if (zc.hasPath("exhibitor.url")) {
     val validate = zc.getBoolean("exhibitor.validate-certs")
     val exhibitorUrl = zc.getString("exhibitor.url")
-    Await.result(ExhibitorClient(system, exhibitorUrl, validate).getZookeepers(), 10 seconds)
+    val exhibitorPath = if(zc.hasPath("exhibitor.request-path")) zc.getString("exhibitor.request-path") else "/exhibitor/v1/cluster/list"
+    Await.result(ExhibitorClient(system, exhibitorUrl, exhibitorPath, validate).getZookeepers(), 10 seconds)
   } else zc.getString("url")
 
   val ZKPath = zc.getString("path")

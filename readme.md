@@ -58,6 +58,21 @@ akka.cluster.seed.zookeeper {
 
 ```
 
+If you require a different exhibitor request path than the default `/exhibitor/v1/cluster/list`
+
+```
+// application.conf
+akka.cluster.seed.zookeeper {
+    path = "/akka/cluster/seed"
+    exhibitor {
+        url = "https://user:pass@host:port
+        request-path = "/my/custom/path"
+        validate-certs = true|false
+    }
+}
+
+```
+
 If your zookeeper path requires authorization you have to specify additional `authorization` section:
 
 

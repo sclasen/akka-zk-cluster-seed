@@ -23,13 +23,13 @@ import DefaultJsonProtocol._
 import spray.json.JsonParser
 import java.security.cert.X509Certificate
 
-case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, validateCerts: Boolean) extends Client {
+case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, requestPath: String, validateCerts: Boolean) extends Client {
 
   val url = new URL(exhibitorUrl)
 
   implicit val dispatcher = system.dispatcher
 
-  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(GET, "/exhibitor/v1/cluster/list"))(extractUrl).map {
+  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(GET, requestPath))(extractUrl).map {
     url => chroot.map(url + "/" + _).getOrElse(url)
   }
 
