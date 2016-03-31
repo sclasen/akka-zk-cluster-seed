@@ -5,8 +5,10 @@ import akka.cluster.Cluster
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
 import org.apache.curator.framework.recipes.leader.LeaderLatch
+
 import scala.collection.immutable
-import org.apache.zookeeper.KeeperException.NodeExistsException
+import org.apache.zookeeper.KeeperException.{ NoNodeException, NodeExistsException }
+
 import concurrent.duration._
 import scala.concurrent._
 import collection.JavaConverters._
@@ -52,6 +54,8 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   val myId = address.hostPort
 
   val path = s"${settings.ZKPath}/${system.name}"
+
+  removeEphemeralNodes
 
   private val latch = new LeaderLatch(client, path, myId)
 
@@ -112,6 +116,29 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     }
   }
 
+  /**
+   * Removes ephemeral nodes for self address that may exist when node restarts abnormally
+   */
+  def removeEphemeralNodes: Unit = {
+    client.getChildren.forPath(path).asScala
+      .map(p => s"$path/$p")
+      .map { p =>
+        try {
+          (p, client.getData.forPath(p))
+        } catch {
+          case _: NoNodeException => (p, Array.empty[Byte])
+        }
+      }
+      .filter(pd => new String(pd._2) == myId)
+      .foreach {
+        case (path, _) =>
+          try {
+            client.delete.forPath(path)
+          } catch {
+            case _: NoNodeException => // do nothing
+          }
+      }
+  }
 }
 
 class ZookeeperClusterSeedSettings(system: ActorSystem) {
@@ -121,7 +148,7 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
   val ZKUrl = if (zc.hasPath("exhibitor.url")) {
     val validate = zc.getBoolean("exhibitor.validate-certs")
     val exhibitorUrl = zc.getString("exhibitor.url")
-    val exhibitorPath = if(zc.hasPath("exhibitor.request-path")) zc.getString("exhibitor.request-path") else "/exhibitor/v1/cluster/list"
+    val exhibitorPath = if (zc.hasPath("exhibitor.request-path")) zc.getString("exhibitor.request-path") else "/exhibitor/v1/cluster/list"
     Await.result(ExhibitorClient(system, exhibitorUrl, exhibitorPath, validate).getZookeepers(), 10 seconds)
   } else zc.getString("url")
 
