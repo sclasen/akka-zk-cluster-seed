@@ -120,7 +120,13 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
    * Removes ephemeral nodes for self address that may exist when node restarts abnormally
    */
   def removeEphemeralNodes: Unit = {
-    client.getChildren.forPath(path).asScala
+    val ephemeralNodes = try {
+      client.getChildren.forPath(path).asScala
+    } catch {
+      case _: NoNodeException => Nil
+    }
+
+    ephemeralNodes
       .map(p => s"$path/$p")
       .map { p =>
         try {
