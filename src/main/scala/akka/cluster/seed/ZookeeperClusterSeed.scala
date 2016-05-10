@@ -55,7 +55,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val path = s"${settings.ZKPath}/${system.name}"
 
-  removeEphemeralNodes
+  removeEphemeralNodes()
 
   private val latch = new LeaderLatch(client, path, myId)
 
@@ -119,7 +119,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   /**
    * Removes ephemeral nodes for self address that may exist when node restarts abnormally
    */
-  def removeEphemeralNodes: Unit = {
+  def removeEphemeralNodes(): Unit = {
     val ephemeralNodes = try {
       client.getChildren.forPath(path).asScala
     } catch {
