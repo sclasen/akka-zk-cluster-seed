@@ -12,6 +12,7 @@ import org.apache.zookeeper.KeeperException.{ NoNodeException, NodeExistsExcepti
 import concurrent.duration._
 import scala.concurrent._
 import collection.JavaConverters._
+import scala.util.control.Exception.ignoring
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
 
@@ -26,7 +27,8 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   val settings = new ZookeeperClusterSeedSettings(system)
 
-  val selfAddress = Cluster(system).selfAddress
+  private val clusterSystem = Cluster(system)
+  val selfAddress = clusterSystem.selfAddress
   val address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
     system.log.info(s"host:port read from environment variables=${settings.host}:${settings.port}")
     selfAddress.copy(host = settings.host, port = settings.port)
@@ -58,23 +60,37 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   removeEphemeralNodes()
 
   private val latch = new LeaderLatch(client, path, myId)
+  private var seedEntryAdded = false
 
-  system.registerOnTermination {
-    import scala.util.control.Exception._
-    ignoring(classOf[IllegalStateException]) {
-      latch.close()
-    }
-    ignoring(classOf[IllegalStateException]) {
-      client.close()
-    }
-  }
-
-  def join(): Unit = {
+  /**
+    * Join or create a cluster using Zookeeper to handle
+    */
+  def join(): Unit = synchronized {
     createPathIfNeeded()
     latch.start()
+    seedEntryAdded = true
     while (!tryJoin()) {
       system.log.error("component=zookeeper-cluster-seed at=try-join-failed id={}", myId)
       Thread.sleep(1000)
+    }
+
+    clusterSystem.registerOnMemberRemoved {
+      removeSeedEntry()
+    }
+
+    system.registerOnTermination {
+      ignoring(classOf[IllegalStateException]) {
+        client.close()
+      }
+    }
+  }
+
+  def removeSeedEntry(): Unit = synchronized {
+    if (seedEntryAdded) {
+      ignoring(classOf[IllegalStateException]) {
+        latch.close()
+        seedEntryAdded = false
+      }
     }
   }
 
