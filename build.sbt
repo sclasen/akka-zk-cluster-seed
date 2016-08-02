@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
 name := "akka-zk-cluster-seed"
 
-version := "0.1.6-SNAPSHOT"
+version := "0.1.6"
 
 scalaVersion := "2.11.7"
 
