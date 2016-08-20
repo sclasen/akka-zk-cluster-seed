@@ -8,37 +8,39 @@ name := "akka-zk-cluster-seed"
 
 version := "0.1.7-SNAPSHOT"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.11.7")
+crossScalaVersions := Seq("2.11.8")
 
-val akkaVersion      = "2.4.0"
+val akkaVersion = "2.4.9"
 
 val akkaDependencies = Seq(
-  "com.typesafe.akka" %% "akka-actor" % akkaVersion % "provided",
-  "com.typesafe.akka" %% "akka-cluster" % akkaVersion % "provided",
-  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % "provided",
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.7" % "provided",
-  "ch.qos.logback" % "logback-classic" % "1.1.2"  % "provided",
-  "io.spray" %% "spray-json" % "1.2.6" % "provided",
-  "io.spray" %% "spray-client" % "1.3.2" % "provided"
-)
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
+  "ch.qos.logback" % "logback-classic" % "1.1.2",
+  "io.spray" %% "spray-json" % "1.2.6",
+  "io.spray" %% "spray-client" % "1.3.2"
+).map(_ % Provided)
 
 val zkDependencies = Seq(
-  "org.apache.curator" % "curator-framework" % "2.8.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12"),
-  "org.apache.curator" % "curator-recipes" % "2.8.0"  exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
-)
+  "curator-framework",
+  "curator-recipes"
+).map { 
+  "org.apache.curator" % _ % "2.11.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
+}
 
 val testDependencies = Seq(
-  "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-  "com.typesafe.akka" %% "akka-actor" % akkaVersion % "test",
-  "com.typesafe.akka" %% "akka-cluster" % akkaVersion % "test",
-  "org.scalatest" %% "scalatest" % "2.1.6" % "test",
-  "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion % "test",
-  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % "test",
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.7" % "test",
-  "ch.qos.logback" % "logback-classic" % "1.1.2"  % "test"
-)
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "org.scalatest" %% "scalatest" % "2.1.6",
+  "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
+  "ch.qos.logback" % "logback-classic" % "1.1.2"
+).map(_ % Test)
 
 lazy val rootProject = (project in file(".")).
   settings(
