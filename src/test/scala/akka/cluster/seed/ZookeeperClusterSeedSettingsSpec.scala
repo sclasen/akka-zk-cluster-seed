@@ -11,7 +11,7 @@ class ZookeeperClusterSeedSettingsSpec extends TestKit(ActorSystem("test", Zooke
   "ZookeeperClusterSeedSettings " should {
     "parse authentication options from config" in {
       val settings = new ZookeeperClusterSeedSettings(system)
-      settings.ZKAuthorization should be(Some("digest", "foo:bar"))
+      settings.ZKAuthorization should be(Some(("digest", "foo:bar")))
     }
   }
 }
