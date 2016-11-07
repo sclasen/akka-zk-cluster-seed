@@ -20,7 +20,7 @@ val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
-  "io.spray" %% "spray-json" % "1.2.6",
+  "io.spray" %% "spray-json" % "1.3.2",
   "io.spray" %% "spray-client" % "1.3.2"
 ).map(_ % Provided)
 
@@ -35,7 +35,7 @@ val testDependencies = Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
-  "org.scalatest" %% "scalatest" % "2.1.6",
+  "org.scalatest" %% "scalatest" % "3.0.1",
   "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
