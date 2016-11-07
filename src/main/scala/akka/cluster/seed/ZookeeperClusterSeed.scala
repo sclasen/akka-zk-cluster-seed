@@ -53,7 +53,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     client
   }
 
-  val myId = address.hostPort
+  val myId = s"${address.protocol}://${address.hostPort}"
 
   val path = s"${settings.ZKPath}/${system.name}"
 
@@ -103,7 +103,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
       true
     } else {
       val seeds = latch.getParticipants.iterator().asScala.filterNot(_.getId == myId).map {
-        node => AddressFromURIString(s"akka.tcp://${node.getId}")
+        node => AddressFromURIString(node.getId)
       }.toList
       system.log.warning("component=zookeeper-cluster-seed at=join-cluster seeds={}", seeds)
       Cluster(system).joinSeedNodes(immutable.Seq(seeds: _*))

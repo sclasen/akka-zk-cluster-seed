@@ -12,7 +12,7 @@ scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq("2.11.8")
 
-val akkaVersion = "2.4.9"
+val akkaVersion = "2.4.12"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
