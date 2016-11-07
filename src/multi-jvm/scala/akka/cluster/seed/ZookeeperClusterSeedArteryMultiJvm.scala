@@ -1,19 +1,15 @@
 package akka.cluster.seed.zookeeper
 
-import akka.remote.testkit.MultiNodeSpecCallbacks
-import akka.util.Timeout
+import akka.cluster.Cluster
+import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
+import akka.cluster.seed.ZookeeperClusterSeed
 import akka.remote.testkit.{MultiNodeConfig, MultiNodeSpec}
 import akka.testkit.ImplicitSender
-import akka.actor._
-import com.typesafe.config.{ConfigFactory, Config}
-import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
-import akka.cluster.Cluster
+import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Random, Properties}
-import akka.cluster.ClusterEvent.MemberUp
-import akka.cluster.seed.ZookeeperClusterSeed
-import concurrent.duration._
-import org.scalatest._
+import scala.util.{Properties, Random}
 
 
 object ZookeeperClusterSeedArteryMultiNodeConfig extends MultiNodeConfig {
@@ -46,8 +42,6 @@ class ZookeeperClusterSeedArteryMultiJvmNode4 extends ZookeeperClusterSeedArtery
 
 class ZookeeperClusterSeedArterySpec extends  MultiNodeSpec(ZookeeperClusterSeedArteryMultiNodeConfig)
 with ScalaTestMultiNodeSpec with ImplicitSender {
-
-  import ZookeeperClusterSeedArteryMultiNodeConfig._
 
   def initialParticipants = roles.size
 

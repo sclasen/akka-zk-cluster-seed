@@ -1,30 +1,20 @@
 package akka.cluster.seed.zookeeper
 
-import akka.remote.testkit.MultiNodeSpecCallbacks
-import akka.util.Timeout
+import akka.cluster.Cluster
+import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
+import akka.cluster.seed.ZookeeperClusterSeed
 import akka.remote.testkit.{MultiNodeConfig, MultiNodeSpec}
 import akka.testkit.ImplicitSender
-import akka.actor._
-import com.typesafe.config.{ConfigFactory, Config}
-import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
-import akka.cluster.Cluster
+import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.{Random, Properties}
-import akka.cluster.ClusterEvent.MemberUp
-import akka.cluster.seed.ZookeeperClusterSeed
-import concurrent.duration._
-import org.scalatest._
+import scala.util.{Properties, Random}
 
 
-trait ScalaTestMultiNodeSpec extends MultiNodeSpecCallbacks with WordSpecLike with MustMatchers with BeforeAndAfterAll {
 
-  override def beforeAll() = multiNodeSpecBeforeAll()
 
-  override def afterAll() = multiNodeSpecAfterAll()
-
-}
-
-object ZookeeperClusterSeedrMultiNodeConfig extends MultiNodeConfig {
+object ZookeeperClusterSeedMultiNodeConfig extends MultiNodeConfig {
   val node1 = role("node1")
   val node2 = role("node2")
   val node3 = role("node3")
@@ -50,10 +40,8 @@ class ZookeeperClusterSeedMultiJvmNode3 extends ZookeeperClusterSeedSpec
 
 class ZookeeperClusterSeedMultiJvmNode4 extends ZookeeperClusterSeedSpec
 
-class ZookeeperClusterSeedSpec extends  MultiNodeSpec(ZookeeperClusterSeedrMultiNodeConfig)
+class ZookeeperClusterSeedSpec extends  MultiNodeSpec(ZookeeperClusterSeedMultiNodeConfig)
 with ScalaTestMultiNodeSpec with ImplicitSender {
-
-  import ZookeeperClusterSeedrMultiNodeConfig._
 
   def initialParticipants = roles.size
 
