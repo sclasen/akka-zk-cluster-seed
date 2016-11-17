@@ -10,7 +10,7 @@ version := "0.1.9-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.11.8")
+crossScalaVersions := Seq("2.11.8", "2.12.0")
 
 val akkaVersion = "2.4.12"
 
