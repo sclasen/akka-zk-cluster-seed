@@ -1,16 +1,13 @@
-import com.typesafe.sbt.SbtScalariform._
 
 import com.typesafe.sbt.SbtMultiJvm
-
 import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
+organization := "com.sclasen"
 name := "akka-zk-cluster-seed"
-
 version := "0.1.9-SNAPSHOT"
 
 scalaVersion := "2.11.8"
-
-crossScalaVersions := Seq("2.11.8", "2.12.0")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.1")
 
 val akkaVersion = "2.4.12"
 val akkaHttpVersion = "10.0.1"
@@ -48,13 +45,6 @@ lazy val rootProject = (project in file(".")).
     libraryDependencies ++= (akkaDependencies ++ zkDependencies ++ testDependencies),
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.6", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
     javacOptions in Compile ++= Seq("-source", "1.6", "-target", "1.6", "-Xlint:unchecked", "-Xlint:deprecation"),
-    organization := "com.sclasen",
-    name := "akka-zk-cluster-seed",
-    version := "0.1.5-SNAPSHOT",
-    scalaVersion := "2.11.7",
-    crossScalaVersions := Seq("2.11.7", "2.10.4"),
-    parallelExecution in Test := false,
-    // scalariformSettings
     parallelExecution in Test := false,
 
     pomExtra := (
