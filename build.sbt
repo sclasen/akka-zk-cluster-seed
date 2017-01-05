@@ -13,15 +13,16 @@ scalaVersion := "2.11.8"
 crossScalaVersions := Seq("2.11.8", "2.12.0")
 
 val akkaVersion = "2.4.12"
+val akkaHttpVersion = "10.0.1"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
-  "io.spray" %% "spray-json" % "1.3.2",
-  "io.spray" %% "spray-client" % "1.3.2"
+  "io.spray" %% "spray-json" % "1.3.2"
 ).map(_ % Provided)
 
 val zkDependencies = Seq(
