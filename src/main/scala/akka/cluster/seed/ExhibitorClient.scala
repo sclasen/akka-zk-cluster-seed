@@ -9,6 +9,7 @@ import akka.http.scaladsl._
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
+import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import spray.json.DefaultJsonProtocol._
 import spray.json.JsonParser
 
@@ -56,7 +57,16 @@ trait Client {
   implicit val t = Timeout(10 seconds)
 
   def pipeline[T](req: HttpRequest)(t: HttpResponse => Future[T]): Future[T] = {
-    Http().singleRequest(req.copy(uri = uri)).flatMap(t)
+    val connectionContext = if(validateCerts){
+      Http().createClientHttpsContext(AkkaSSLConfig())
+    } else {
+      val badSslConfig = AkkaSSLConfig().mapSettings {
+        s => s.withLoose(s.loose.withDisableSNI(true).withAcceptAnyCertificate(true).withDisableHostnameVerification(true))
+      }
+      Http().createClientHttpsContext(badSslConfig)
+    }
+
+    Http().singleRequest(req.copy(uri = uri), connectionContext).flatMap(t)
   }
 
 }
