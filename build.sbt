@@ -45,14 +45,6 @@ lazy val rootProject = (project in file(".")).
     libraryDependencies ++= (akkaDependencies ++ zkDependencies ++ testDependencies),
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
     javacOptions in Compile ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
-    scalacOptions in Compile ++= {
-      if(scalaVersion.value.startsWith("2.12")) Seq.empty
-      else Seq("-target:jvm-1.6")
-    },
-    javacOptions in Compile ++= {
-      if(scalaVersion.value.startsWith("2.12")) Seq.empty
-      else Seq("-source", "1.6", "-target", "1.6")
-    },
     parallelExecution in Test := false,
 
     pomExtra := (
