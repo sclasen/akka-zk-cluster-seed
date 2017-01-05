@@ -43,8 +43,16 @@ val testDependencies = Seq(
 lazy val rootProject = (project in file(".")).
   settings(
     libraryDependencies ++= (akkaDependencies ++ zkDependencies ++ testDependencies),
-    scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-target:jvm-1.6", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
-    javacOptions in Compile ++= Seq("-source", "1.6", "-target", "1.6", "-Xlint:unchecked", "-Xlint:deprecation"),
+    scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
+    javacOptions in Compile ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
+    scalacOptions in Compile ++= {
+      if(scalaVersion.value.startsWith("2.12")) Seq.empty
+      else Seq("-target:jvm-1.6")
+    },
+    javacOptions in Compile ++= {
+      if(scalaVersion.value.startsWith("2.12")) Seq.empty
+      else Seq("-source", "1.6", "-target", "1.6")
+    },
     parallelExecution in Test := false,
 
     pomExtra := (
@@ -68,8 +76,8 @@ lazy val rootProject = (project in file(".")).
         </developer>
       </developers>),
 
-    publishTo <<= version {
-      (v: String) =>
+    publishTo := {
+      val v = version.value
       val nexus = "https://oss.sonatype.org/"
       if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
       else Some("releases" at nexus + "service/local/staging/deploy/maven2")
