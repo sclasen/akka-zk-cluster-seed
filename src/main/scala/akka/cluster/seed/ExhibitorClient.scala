@@ -1,6 +1,5 @@
 package akka.cluster.seed
 
-import java.net.URL
 import java.security.cert.X509Certificate
 import javax.net.ssl.{SSLContext, X509TrustManager}
 
@@ -63,10 +62,27 @@ trait Client {
       val badSslConfig = AkkaSSLConfig().mapSettings {
         s => s.withLoose(s.loose.withDisableSNI(true).withAcceptAnyCertificate(true).withDisableHostnameVerification(true))
       }
-      Http().createClientHttpsContext(badSslConfig)
+      new HttpsConnectionContext(SSL.nonValidatingContext, Some(badSslConfig))
     }
 
     Http().singleRequest(req.copy(uri = uri), connectionContext).flatMap(t)
   }
 
+}
+
+object SSL {
+
+  lazy val nonValidatingContext = {
+    class IgnoreX509TrustManager extends X509TrustManager {
+      def checkClientTrusted(chain: Array[X509Certificate], authType: String) {}
+
+      def checkServerTrusted(chain: Array[X509Certificate], authType: String) {}
+
+      def getAcceptedIssuers = null
+    }
+
+    val context = SSLContext.getInstance("TLS")
+    context.init(null, Array(new IgnoreX509TrustManager), null)
+    context
+  }
 }
