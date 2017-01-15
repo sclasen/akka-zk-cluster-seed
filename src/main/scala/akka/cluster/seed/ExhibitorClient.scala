@@ -57,7 +57,7 @@ trait Client {
 
   def pipeline[T](req: HttpRequest)(t: HttpResponse => Future[T]): Future[T] = {
     val connectionContext = if(validateCerts){
-      Http().createClientHttpsContext(AkkaSSLConfig())
+      Http().defaultClientHttpsContext
     } else {
       val badSslConfig = AkkaSSLConfig().mapSettings {
         s => s.withLoose(s.loose.withDisableSNI(true).withAcceptAnyCertificate(true).withDisableHostnameVerification(true))
