@@ -1,11 +1,11 @@
 package akka.cluster.seed
 
-import java.net.URL
 import java.security.cert.X509Certificate
 import javax.net.ssl.{SSLContext, X509TrustManager}
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl._
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
@@ -23,7 +23,7 @@ case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, requestPat
 
   implicit val dispatcher = system.dispatcher
 
-  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(HttpMethods.GET, requestPath))(extractUrl).map {
+  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(HttpMethods.GET, uri.withPath(Path(requestPath))))(extractUrl).map {
     url => chroot.map(url + "/" + _).getOrElse(url)
   }
 
@@ -58,15 +58,32 @@ trait Client {
 
   def pipeline[T](req: HttpRequest)(t: HttpResponse => Future[T]): Future[T] = {
     val connectionContext = if(validateCerts){
-      Http().createClientHttpsContext(AkkaSSLConfig())
+      Http().defaultClientHttpsContext
     } else {
       val badSslConfig = AkkaSSLConfig().mapSettings {
         s => s.withLoose(s.loose.withDisableSNI(true).withAcceptAnyCertificate(true).withDisableHostnameVerification(true))
       }
-      Http().createClientHttpsContext(badSslConfig)
+      new HttpsConnectionContext(SSL.nonValidatingContext, Some(badSslConfig))
     }
 
-    Http().singleRequest(req.copy(uri = uri), connectionContext).flatMap(t)
+    Http().singleRequest(req, connectionContext).flatMap(t)
   }
 
+}
+
+object SSL {
+
+  lazy val nonValidatingContext = {
+    class IgnoreX509TrustManager extends X509TrustManager {
+      def checkClientTrusted(chain: Array[X509Certificate], authType: String) {}
+
+      def checkServerTrusted(chain: Array[X509Certificate], authType: String) {}
+
+      def getAcceptedIssuers = null
+    }
+
+    val context = SSLContext.getInstance("TLS")
+    context.init(null, Array(new IgnoreX509TrustManager), null)
+    context
+  }
 }

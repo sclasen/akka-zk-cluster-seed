@@ -14,7 +14,10 @@ val akkaHttpVersion = "10.0.1"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion
+)
+
+val exhibitorOptionalDependencies = Seq(
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
@@ -42,7 +45,7 @@ val testDependencies = Seq(
 
 lazy val rootProject = (project in file(".")).
   settings(
-    libraryDependencies ++= (akkaDependencies ++ zkDependencies ++ testDependencies),
+    libraryDependencies ++= (akkaDependencies ++ exhibitorOptionalDependencies ++ zkDependencies ++ testDependencies),
     scalacOptions in Compile ++= Seq("-encoding", "UTF-8", "-deprecation", "-feature", "-unchecked", "-Xlog-reflective-calls", "-Xlint", "-language:postfixOps"),
     javacOptions in Compile ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"),
     parallelExecution in Test := false,
