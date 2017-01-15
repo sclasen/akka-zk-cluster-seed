@@ -5,6 +5,7 @@ import javax.net.ssl.{SSLContext, X509TrustManager}
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl._
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
@@ -22,7 +23,7 @@ case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, requestPat
 
   implicit val dispatcher = system.dispatcher
 
-  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(HttpMethods.GET, requestPath))(extractUrl).map {
+  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(HttpMethods.GET, uri.withPath(Path(requestPath))))(extractUrl).map {
     url => chroot.map(url + "/" + _).getOrElse(url)
   }
 
@@ -65,7 +66,7 @@ trait Client {
       new HttpsConnectionContext(SSL.nonValidatingContext, Some(badSslConfig))
     }
 
-    Http().singleRequest(req.copy(uri = uri), connectionContext).flatMap(t)
+    Http().singleRequest(req, connectionContext).flatMap(t)
   }
 
 }
