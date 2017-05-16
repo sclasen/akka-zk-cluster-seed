@@ -9,8 +9,8 @@ version := "0.1.9-SNAPSHOT"
 scalaVersion := "2.11.8"
 crossScalaVersions := Seq(scalaVersion.value, "2.12.1")
 
-val akkaVersion = "2.4.12"
-val akkaHttpVersion = "10.0.1"
+val akkaVersion = "2.4.18"
+val akkaHttpVersion = "10.0.6"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
@@ -22,7 +22,7 @@ val exhibitorOptionalDependencies = Seq(
   "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
   "ch.qos.logback" % "logback-classic" % "1.1.2",
-  "io.spray" %% "spray-json" % "1.3.2"
+  "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
 ).map(_ % Provided)
 
 val zkDependencies = Seq(

@@ -28,8 +28,8 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   val settings = new ZookeeperClusterSeedSettings(system)
 
   private val clusterSystem = Cluster(system)
-  val selfAddress = clusterSystem.selfAddress
-  val address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
+  val selfAddress: Address = clusterSystem.selfAddress
+  val address    : Address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
     system.log.info(s"host:port read from environment variables=${settings.host}:${settings.port}")
     selfAddress.copy(host = settings.host, port = settings.port)
   } else
@@ -133,8 +133,8 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   }
 
   /**
-   * Removes ephemeral nodes for self address that may exist when node restarts abnormally
-   */
+    * Removes ephemeral nodes for self address that may exist when node restarts abnormally
+    */
   def removeEphemeralNodes(): Unit = {
     val ephemeralNodes = try {
       client.getChildren.forPath(path).asScala
@@ -153,9 +153,9 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
       }
       .filter(pd => new String(pd._2) == myId)
       .foreach {
-        case (path, _) =>
+        case (p, _) =>
           try {
-            client.delete.forPath(path)
+            client.delete.forPath(p)
           } catch {
             case _: NoNodeException => // do nothing
           }
@@ -167,14 +167,14 @@ class ZookeeperClusterSeedSettings(system: ActorSystem) {
 
   private val zc = system.settings.config.getConfig("akka.cluster.seed.zookeeper")
 
-  val ZKUrl = if (zc.hasPath("exhibitor.url")) {
+  val ZKUrl: String = if (zc.hasPath("exhibitor.url")) {
     val validate = zc.getBoolean("exhibitor.validate-certs")
     val exhibitorUrl = zc.getString("exhibitor.url")
     val exhibitorPath = if (zc.hasPath("exhibitor.request-path")) zc.getString("exhibitor.request-path") else "/exhibitor/v1/cluster/list"
-    Await.result(ExhibitorClient(system, exhibitorUrl, exhibitorPath, validate).getZookeepers(), 10 seconds)
+    Await.result(ExhibitorClient(system, exhibitorUrl, exhibitorPath, validate).getZookeepers(), 10.seconds)
   } else zc.getString("url")
 
-  val ZKPath = zc.getString("path")
+  val ZKPath: String = zc.getString("path")
 
   val ZKAuthorization: Option[(String, String)] = if (zc.hasPath("authorization.scheme") && zc.hasPath("authorization.auth"))
     Some((zc.getString("authorization.scheme"), zc.getString("authorization.auth")))

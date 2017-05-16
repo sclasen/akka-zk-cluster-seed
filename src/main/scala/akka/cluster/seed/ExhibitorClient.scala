@@ -14,16 +14,16 @@ import spray.json.DefaultJsonProtocol._
 import spray.json.JsonParser
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 import scala.language.postfixOps
 
 case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, requestPath: String, validateCerts: Boolean) extends Client {
 
   val uri = Uri(exhibitorUrl)
 
-  implicit val dispatcher = system.dispatcher
+  implicit val dispatcher: ExecutionContextExecutor = system.dispatcher
 
-  def getZookeepers(chroot: Option[String] = None) = pipeline(HttpRequest(HttpMethods.GET, uri.withPath(Path(requestPath))))(extractUrl).map {
+  def getZookeepers(chroot: Option[String] = None): Future[String] = pipeline(HttpRequest(HttpMethods.GET, uri.withPath(Path(requestPath))))(extractUrl).map {
     url => chroot.map(url + "/" + _).getOrElse(url)
   }
 
@@ -50,9 +50,9 @@ trait Client {
 
   protected implicit def dispatcher: ExecutionContext
 
-  protected implicit val s = system
+  protected implicit val s: ActorSystem = system
 
-  protected implicit val materializer = ActorMaterializer.create(system)
+  protected implicit val materializer: ActorMaterializer = ActorMaterializer.create(system)
 
   implicit val t = Timeout(10 seconds)
 
@@ -73,7 +73,7 @@ trait Client {
 
 object SSL {
 
-  lazy val nonValidatingContext = {
+  lazy val nonValidatingContext: SSLContext = {
     class IgnoreX509TrustManager extends X509TrustManager {
       def checkClientTrusted(chain: Array[X509Certificate], authType: String) {}
 
