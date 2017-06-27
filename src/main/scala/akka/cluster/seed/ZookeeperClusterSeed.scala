@@ -70,7 +70,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     latch.start()
     seedEntryAdded = true
     while (!tryJoin()) {
-      system.log.error("component=zookeeper-cluster-seed at=try-join-failed id={}", myId)
+      system.log.warning("component=zookeeper-cluster-seed at=try-join-failed id={}", myId)
       Thread.sleep(1000)
     }
 
