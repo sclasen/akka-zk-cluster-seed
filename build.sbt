@@ -4,7 +4,7 @@ import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
 organization := "com.sclasen"
 name := "akka-zk-cluster-seed"
-version := "0.1.9"
+version := "0.1.10-SNAPSHOT"
 
 scalaVersion := "2.11.8"
 crossScalaVersions := Seq(scalaVersion.value, "2.12.1")
