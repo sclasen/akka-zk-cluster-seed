@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 
 import scala.concurrent.Await
 import concurrent.duration._
+import scala.util.Try
 
 class ZookeeperClusterSeedSettings(system: ActorSystem,
                                    settingsRoot: String = "akka.cluster.seed.zookeeper",
@@ -33,5 +34,7 @@ class ZookeeperClusterSeedSettings(system: ActorSystem,
   val port: Option[Int] = if (zc.hasPath("port_env_var"))
     Some(zc.getInt("port_env_var"))
   else None
+
+  val autoDown: Boolean = Try(zc.getBoolean("auto-down")).getOrElse(false)
 
 }

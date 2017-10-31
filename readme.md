@@ -87,6 +87,16 @@ akka.cluster.seed.zookeeper {
 }
 ```
 
+Auto-downing of nodes when they're unregistered from zookeeper:
+
+```
+// aplication.conf
+akka.cluster.see.zookeeper {
+    auto-down = true # optional. default is false
+}
+
+```
+
 
 details
 -------

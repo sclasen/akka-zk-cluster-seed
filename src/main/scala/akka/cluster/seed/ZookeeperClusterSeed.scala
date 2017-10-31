@@ -1,12 +1,16 @@
 package akka.cluster.seed
 
+import java.io.Closeable
+
 import akka.actor._
 import akka.cluster.{AkkaCuratorClient, Cluster, ZookeeperClusterSeedSettings}
+import org.apache.curator.framework.CuratorFramework
+import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
 import org.apache.curator.framework.recipes.leader.LeaderLatch
 import org.apache.zookeeper.KeeperException.{NoNodeException, NodeExistsException}
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable
+import scala.collection.{immutable, mutable}
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util.control.Exception.ignoring
@@ -26,7 +30,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   private val clusterSystem = Cluster(system)
   val selfAddress: Address = clusterSystem.selfAddress
-  val address    : Address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
+  val address: Address = if (settings.host.nonEmpty && settings.port.nonEmpty) {
     system.log.info(s"host:port read from environment variables=${settings.host}:${settings.port}")
     selfAddress.copy(host = settings.host, port = settings.port)
   } else
@@ -42,6 +46,26 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
   private val latch = new LeaderLatch(client, path, myId)
   private var seedEntryAdded = false
+
+  val closeableServices = mutable.Set[Closeable]()
+
+  closeableServices.add(latch)
+
+  if (settings.autoDown) {
+    val pathCache = new PathChildrenCache(client, path, true)
+    pathCache.getListenable.addListener(new PathChildrenCacheListener {
+      override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = if (latch.hasLeadership)
+        event.getType match {
+          case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
+            val childAddress = new String(event.getData.getData)
+            system.log.warning("component=zookeeper-cluster-seed at=downing-cluster-node node-address={}", childAddress)
+            clusterSystem.down(AddressFromURIString(childAddress))
+          case _ => // do nothing
+        }
+    })
+    pathCache.start()
+    closeableServices.add(pathCache)
+  }
 
   /**
     * Join or create a cluster using Zookeeper to handle
@@ -69,7 +93,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
   def removeSeedEntry(): Unit = synchronized {
     if (seedEntryAdded) {
       ignoring(classOf[IllegalStateException]) {
-        latch.close()
+        closeableServices.foreach(_.close())
         seedEntryAdded = false
       }
     }
