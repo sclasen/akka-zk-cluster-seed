@@ -2,7 +2,7 @@ package akka.cluster.client
 
 import akka.actor.{ActorSystem, Props}
 import akka.cluster.{AkkaCuratorClient, ZookeeperClusterSeedSettings}
-import com.typesafe.config.ConfigValueFactory
+import com.typesafe.config.{Config, ConfigValueFactory}
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.locks.{LockInternals, LockInternalsSorter, StandardLockInternalsDriver}
 
@@ -17,14 +17,14 @@ object ZookeeperClusterClientSettings {
       StandardLockInternalsDriver.standardFixForSorting(str, lockName)
   }
 
-  def apply(system: ActorSystem): ClusterClientSettings = {
-    val config = system.settings.config.getConfig("akka.cluster.client")
+  def apply(system: ActorSystem, overwrittenActorSettings: Option[Config] = None): ClusterClientSettings = {
+    val config = overwrittenActorSettings.getOrElse(system.settings.config).getConfig("akka.cluster.client")
 
     val systemName = config.getString("zookeeper.name")
 
     val receptionistPath = "/system/" + Try(config.getString("zookeeper.receptionistName")).getOrElse("receptionist")
 
-    val settings = new ZookeeperClusterSeedSettings(system, "akka.cluster.client.zookeeper")
+    val settings = new ZookeeperClusterSeedSettings(system, "akka.cluster.client.zookeeper", overwrittenActorSettings)
 
     val client = AkkaCuratorClient(settings)
 

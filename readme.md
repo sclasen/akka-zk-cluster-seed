@@ -109,3 +109,70 @@ akka.cluster.seed.zookeeper {
     port_env_var = ${?PORT_8080}
 }
 ```
+
+client
+------
+
+`akka-zk-cluter-seed` can be used to create a `ClusterClient` that will automatically pull `initial-contacts` from Zookeeper.
+The configuration is very similar to the seed config
+
+```
+// client-reference.conf
+akka.clister.client.zookeeper {
+    url = "127.0.0.1:2181"
+    path = "/akka/cluster/seed"
+    name = "myclusteractor" # this is the name of your actor system
+    
+    receptionistName = "receptionist" # optional, set to 'receptionist' by default
+    
+    // and all the connection properties you can use in your seed config like 'exhibitor' or 'authorization' etc.
+}
+```
+
+Usage in your code is as simple as
+
+```
+val lusterClient = system.actorOf(ZookeeperClusterClientProps(system), "clusterClient")
+
+```
+
+where `system` is your `ActorSystem` which uses the above configuration.
+
+If you would like to use multiple cluster clients from one application you can provide all the configuration that is 
+common in your case and then provide the needed config in your code for example
+
+Your application.conf file
+
+```
+akka.cluster.client {
+    zookeeper {
+      url = ${ZOOKEEPER_ADDR}
+      path = "/akka/cluster/seed"
+    }
+    establishing-get-contacts-interval = 3s
+    refresh-contacts-interval = 60s
+    heartbeat-interval = 2s
+    acceptable-heartbeat-pause = 5s
+    buffer-size = 5000
+}
+```
+
+Your application bootstrap code (given you have two clusters called `foo` and `bar`)
+
+```
+// connect to multiple clusters
+
+val zookeeperClusterSettings = system.settings.config
+
+val clusterClientToFoo = ClusterClient.props(
+        ZookeeperClusterClientSettings(
+          system, 
+          Some(zookeeperClusterSettings.withValue("name", ConfigValueFactory.fromAnyRef("foo"))))
+      )
+    
+val clusterClientToBar = ClusterClient.props(
+        ZookeeperClusterClientSettings(
+          system, 
+          Some(zookeeperClusterSettings.withValue("name", ConfigValueFactory.fromAnyRef("bar"))))
+      )
+``` 

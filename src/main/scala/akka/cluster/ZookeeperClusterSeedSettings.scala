@@ -2,14 +2,16 @@ package akka.cluster
 
 import akka.actor.ActorSystem
 import akka.cluster.seed.ExhibitorClient
+import com.typesafe.config.Config
 
 import scala.concurrent.Await
-
 import concurrent.duration._
 
-class ZookeeperClusterSeedSettings(system: ActorSystem, settingsRoot: String = "akka.cluster.seed.zookeeper") {
+class ZookeeperClusterSeedSettings(system: ActorSystem,
+                                   settingsRoot: String = "akka.cluster.seed.zookeeper",
+                                   overwrittenActorSettings: Option[Config] = None) {
 
-  private val zc = system.settings.config.getConfig(settingsRoot)
+  private val zc = overwrittenActorSettings.getOrElse(system.settings.config).getConfig(settingsRoot)
 
   val ZKUrl: String = if (zc.hasPath("exhibitor.url")) {
     val validate = zc.getBoolean("exhibitor.validate-certs")
