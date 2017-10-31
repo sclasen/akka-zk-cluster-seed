@@ -132,7 +132,7 @@ akka.clister.client.zookeeper {
 Usage in your code is as simple as
 
 ```
-val lusterClient = system.actorOf(ZookeeperClusterClientProps(system), "clusterClient")
+val clusterClient = system.actorOf(ZookeeperClusterClientProps(system), "clusterClient")
 
 ```
 
