@@ -123,7 +123,7 @@ akka.clister.client.zookeeper {
     path = "/akka/cluster/seed"
     name = "myclusteractor" # this is the name of your actor system
     
-    receptionistName = "receptionist" # optional, set to 'receptionist' by default
+    receptionistName = "/system/receptionist" # optional, set to '/system/receptionist' by default
     
     // and all the connection properties you can use in your seed config like 'exhibitor' or 'authorization' etc.
 }

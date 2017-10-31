@@ -22,7 +22,7 @@ object ZookeeperClusterClientSettings {
 
     val systemName = config.getString("zookeeper.name")
 
-    val receptionistPath = "/system/" + Try(config.getString("zookeeper.receptionistName")).getOrElse("receptionist")
+    val receptionistPath = Try(config.getString("zookeeper.receptionistName")).getOrElse("/system/receptionist")
 
     val settings = new ZookeeperClusterSeedSettings(system, "akka.cluster.client.zookeeper", overwrittenActorSettings)
 
