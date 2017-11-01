@@ -1,4 +1,3 @@
-
 import com.typesafe.sbt.SbtMultiJvm
 import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
@@ -14,7 +13,8 @@ val akkaHttpVersion = "10.0.6"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-  "com.typesafe.akka" %% "akka-cluster" % akkaVersion
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion
 )
 
 val exhibitorOptionalDependencies = Seq(
@@ -25,12 +25,15 @@ val exhibitorOptionalDependencies = Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
 ).map(_ % Provided)
 
+val curatorVersion = "2.11.0"
+
 val zkDependencies = Seq(
   "curator-framework",
   "curator-recipes"
 ).map { 
-  "org.apache.curator" % _ % "2.11.0" exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
+  "org.apache.curator" % _ % curatorVersion exclude("log4j", "log4j") exclude("org.slf4j", "slf4j-log4j12")
 }
+  
 
 val testDependencies = Seq(
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
@@ -40,7 +43,8 @@ val testDependencies = Seq(
   "com.typesafe.akka" %% "akka-multi-node-testkit" % akkaVersion,
   "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
   "org.slf4j" % "log4j-over-slf4j" % "1.7.7",
-  "ch.qos.logback" % "logback-classic" % "1.1.2"
+  "ch.qos.logback" % "logback-classic" % "1.1.2",
+  "org.apache.curator" % "curator-test" % curatorVersion
 ).map(_ % Test)
 
 lazy val rootProject = (project in file(".")).
