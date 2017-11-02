@@ -35,6 +35,22 @@ class ZookeeperClusterSeedSettings(system: ActorSystem,
     Some(zc.getInt("port_env_var"))
   else None
 
-  val autoDown: Boolean = Try(zc.getBoolean("auto-down")).getOrElse(false)
+  val autoDown: Boolean = Try(zc.getBoolean("auto-down.enabled")).getOrElse(false)
 
+  val autoDownMaxWait: Duration = Try(Duration(zc.getString("auto-down.wait-for-leader"))).getOrElse(Duration("5 seconds"))
+
+  val autoDownUnresolvedStrategy: String = Try(zc.getString("auto-down.unresolved-strategy")).map{strategy =>
+    if (!strategy.equals(AutoDownUnresolvedStrategies.Log) && !strategy.equals(AutoDownUnresolvedStrategies.ForceDown)) {
+      system.log.warning("component=zookeeper-cluster-settings at=config-resolve auto-down.unresolved-strateg uses " +
+        s"unrecognised value {} while the valid values are [${AutoDownUnresolvedStrategies.ForceDown}, ${AutoDownUnresolvedStrategies.Log}]. " +
+        s"Defaulting to ${AutoDownUnresolvedStrategies.Log}")
+      AutoDownUnresolvedStrategies.Log
+    } else strategy
+  }.getOrElse(AutoDownUnresolvedStrategies.Log)
+}
+
+object AutoDownUnresolvedStrategies {
+  val Log = "log"
+
+  val ForceDown = "force-down"
 }

@@ -35,7 +35,7 @@ You will certainly want to provide an override to the `akka.cluster.seed.zookeep
 It expects standard zookeeper url format like so: `192.168.12.11,192.168.12.12,192.168.12.13:2818`
 
 
-```
+```yaml
 // reference.conf
 akka.cluster.seed.zookeeper {
     url = "127.0.0.1:2181"
@@ -47,7 +47,7 @@ akka.cluster.seed.zookeeper {
 `netfix exhibitor` integration: if you want to use netflix exhibitor to discover your zookeeper servers, you should configure like so.
 
 
-```
+```yaml
 // application.conf
 akka.cluster.seed.zookeeper {
     path = "/akka/cluster/seed"
@@ -61,7 +61,7 @@ akka.cluster.seed.zookeeper {
 
 If you require a different exhibitor request path than the default `/exhibitor/v1/cluster/list`
 
-```
+```yaml
 // application.conf
 akka.cluster.seed.zookeeper {
     path = "/akka/cluster/seed"
@@ -77,7 +77,7 @@ akka.cluster.seed.zookeeper {
 If your zookeeper path requires authorization you have to specify additional `authorization` section:
 
 
-```
+```yaml
 // application.conf
 akka.cluster.seed.zookeeper {
     authorization {
@@ -87,16 +87,32 @@ akka.cluster.seed.zookeeper {
 }
 ```
 
+### Auto-downing
+
 Auto-downing of nodes when they're unregistered from zookeeper:
 
-```
+```yaml
 // aplication.conf
-akka.cluster.see.zookeeper {
-    auto-down = true # optional. default is false
+akka.cluster.seed.zookeeper {
+    auto-down {
+      enabled = true # default is false - autodawning is switched off
+      wait-for-leader = 5 secons # duration from scala.concurrent.duration.Duration, default 5 seconds
+      unresolved-strategy = log # can be 'log' or 'force-down', default is 'log'
+    }
 }
-
 ```
 
+When switched on, when a node is unregistered from zookeeper it will be automatically removed from the cluster by the
+curator's latch leader (for more info see below in the _details_ section).
+
+In order to prevent from notification race conditions each node upon notification of a node removal will firstly wait
+for a new leader election (should the previously leader be removed) and only then the newly elected leader will
+down the unregistered node from the cluster.
+
+The two extra options `wait-for-leader` and `unresolved-strategy` are used to control the behaviour of the mentioned wait.
+`wait-for-leader` is used to set the maximum time the node will wait for the new leader to get elected, while with 
+`unresolved-strategy` you can either choose to log a warning should the process times out or force downing of the removed
+node which in that case will be performed from all the notified nodes. 
 
 details
 -------
@@ -110,7 +126,7 @@ If you need to use other hostname & port you may configure the _name_ of the env
 This might be handy to use with docker containers
 
 
-```
+```yaml
 // reference.conf
 akka.cluster.seed.zookeeper {
     url = "127.0.0.1:2181"
@@ -126,7 +142,7 @@ client
 `akka-zk-cluter-seed` can be used to create a `ClusterClient` that will automatically pull `initial-contacts` from Zookeeper.
 The configuration is very similar to the seed config
 
-```
+```yaml
 // client-reference.conf
 akka.clister.client.zookeeper {
     url = "127.0.0.1:2181"
@@ -141,7 +157,7 @@ akka.clister.client.zookeeper {
 
 Usage in your code is as simple as
 
-```
+```scala
 val clusterClient = system.actorOf(ZookeeperClusterClientProps(system), "clusterClient")
 
 ```
@@ -153,7 +169,7 @@ common in your case and then provide the needed config in your code for example
 
 Your application.conf file
 
-```
+```yaml
 akka.cluster.client {
     zookeeper {
       url = ${ZOOKEEPER_ADDR}
@@ -169,7 +185,7 @@ akka.cluster.client {
 
 Your application bootstrap code (given you have two clusters called `foo` and `bar`)
 
-```
+```scala
 // connect to multiple clusters
 
 val zookeeperClusterSettings = system.settings.config
