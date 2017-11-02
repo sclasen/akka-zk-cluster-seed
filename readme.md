@@ -190,15 +190,15 @@ Your application bootstrap code (given you have two clusters called `foo` and `b
 
 val zookeeperClusterSettings = system.settings.config
 
-val clusterClientToFoo = ClusterClient.props(
+val clusterClientToFoo = system.actorOf(ClusterClient.props(
         ZookeeperClusterClientSettings(
           system, 
           Some(zookeeperClusterSettings.withValue("name", ConfigValueFactory.fromAnyRef("foo"))))
-      )
+      ), "clusterClientFoo")
     
-val clusterClientToBar = ClusterClient.props(
+val clusterClientToBar = system.actorOf(ClusterClient.props(
         ZookeeperClusterClientSettings(
           system, 
           Some(zookeeperClusterSettings.withValue("name", ConfigValueFactory.fromAnyRef("bar"))))
-      )
+      ), "clusterClientBar")
 ``` 
