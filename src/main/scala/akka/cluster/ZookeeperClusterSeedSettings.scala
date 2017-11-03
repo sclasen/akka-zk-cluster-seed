@@ -47,6 +47,8 @@ class ZookeeperClusterSeedSettings(system: ActorSystem,
       AutoDownUnresolvedStrategies.Log
     } else strategy
   }.getOrElse(AutoDownUnresolvedStrategies.Log)
+
+  val autoShutdown: Boolean = Try(zc.getBoolean("shutdown-on-disconnect")).getOrElse(false)
 }
 
 object AutoDownUnresolvedStrategies {

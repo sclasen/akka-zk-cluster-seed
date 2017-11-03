@@ -7,6 +7,7 @@ import akka.cluster.{AkkaCuratorClient, AutoDownUnresolvedStrategies, Cluster, Z
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
 import org.apache.curator.framework.recipes.leader.{LeaderLatch, LeaderLatchListener}
+import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.zookeeper.KeeperException.{NoNodeException, NodeExistsException}
 
 import scala.annotation.tailrec
@@ -14,6 +15,7 @@ import scala.collection.JavaConverters._
 import scala.collection.{immutable, mutable}
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.util.Try
 import scala.util.control.Exception.ignoring
 
 object ZookeeperClusterSeed extends ExtensionId[ZookeeperClusterSeed] with ExtensionIdProvider {
@@ -51,6 +53,42 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
 
     override def notLeader(): Unit = system.log.info("component=zookeeper-cluster-seed at=leader-change status=Lost leadership")
   })
+
+  if (settings.autoShutdown) {
+    client.getConnectionStateListenable.addListener(new ConnectionStateListener {
+      override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
+        import ConnectionState._
+        newState match {
+          case LOST =>
+            clusterSystem.leave(clusterSystem.selfAddress)
+            system.terminate()
+          case _ =>
+        }
+        system.log.warning("component=zookeeper-cluser-seed at=conntection-state-changed state={}", newState)
+      }
+    })
+
+    clusterSystem.registerOnMemberRemoved {
+      // exit JVM when ActorSystem has been terminated
+      system.registerOnTermination(System.exit(0))
+      // shut down ActorSystem
+      system.terminate()
+      system.log.info("Termination started")
+
+      // In case ActorSystem shutdown takes longer than 10 seconds,
+      // exit the JVM forcefully anyway.
+      // We must spawn a separate thread to not block current thread,
+      // since that would have blocked the shutdown of the ActorSystem.
+      new Thread {
+        override def run(): Unit = {
+          if (Try(Await.ready(system.whenTerminated, 10.seconds)).isFailure) {
+            system.log.info("Forcing system exit")
+            System.exit(-1)
+          }
+        }
+      }.start()
+    }
+  }
 
   private var seedEntryAdded = false
 

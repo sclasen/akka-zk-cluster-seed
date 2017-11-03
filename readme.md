@@ -114,6 +114,22 @@ The two extra options `wait-for-leader` and `unresolved-strategy` are used to co
 `unresolved-strategy` you can either choose to log a warning should the process times out or force downing of the removed
 node which in that case will be performed from all the notified nodes. 
 
+### Shutdown on zookeeper disconnect
+
+Especially when using zookeeper auto-downing it might be problematic that once a node gets kicked out from the cluster
+by other nodes there is no good recovery plans once it reconnects.
+
+You might choose the application to shutdown once that happens. If you are using auto-scaling deployment environments like
+DC/OS the container will take care of restarting your app. This might be the best approach as you will not end up with
+some weird states preserved within your actors.
+
+```yaml
+// aplication.conf
+akka.cluster.seed.zookeeper {
+    shutdown-on-disconnect = true # false by default
+}
+```
+
 details
 -------
 
