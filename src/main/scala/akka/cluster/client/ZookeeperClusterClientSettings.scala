@@ -30,7 +30,7 @@ object ZookeeperClusterClientSettings {
 
     val contacts = getClusterParticipants(client, settings.ZKPath + "/" + systemName).map(_ + receptionistPath)
 
-    system.log.warning("component=zookeeper-cluster-client at=find-initial-contacts contacts={}", contacts)
+    system.log.info("component=zookeeper-cluster-client at=find-initial-contacts contacts={}", contacts)
 
     client.close()
 
