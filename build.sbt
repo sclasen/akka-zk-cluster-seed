@@ -5,11 +5,11 @@ organization := "com.sclasen"
 name := "akka-zk-cluster-seed"
 version := "0.1.10-SNAPSHOT"
 
-scalaVersion := "2.11.8"
-crossScalaVersions := Seq(scalaVersion.value, "2.12.1")
+scalaVersion := "2.12.4"
+crossScalaVersions := Seq(scalaVersion.value, "2.11.11")
 
-val akkaVersion = "2.4.18"
-val akkaHttpVersion = "10.0.6"
+val akkaVersion = "2.5.9"
+val akkaHttpVersion = "10.0.11"
 
 val akkaDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
@@ -25,7 +25,7 @@ val exhibitorOptionalDependencies = Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
 ).map(_ % Provided)
 
-val curatorVersion = "2.11.0"
+val curatorVersion = "2.12.0"
 
 val zkDependencies = Seq(
   "curator-framework",
