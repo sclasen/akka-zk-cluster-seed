@@ -96,7 +96,7 @@ Auto-downing of nodes when they're unregistered from zookeeper:
 akka.cluster.seed.zookeeper {
     auto-down {
       enabled = true # default is false - autodawning is switched off
-      wait-for-leader = 5 secons # duration from scala.concurrent.duration.Duration, default 5 seconds
+      wait-for-leader = 5 seconds # duration from scala.concurrent.duration.Duration, default 5 seconds
       unresolved-strategy = log # can be 'log' or 'force-down', default is 'log'
     }
 }
