@@ -3,7 +3,7 @@ import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
 organization := "com.sclasen"
 name := "akka-zk-cluster-seed"
-version := "0.1.11-SNAPSHOT"
+version := "0.2.0-SNAPSHOT"
 
 scalaVersion := "2.12.4"
 crossScalaVersions := Seq(scalaVersion.value, "2.11.11")
@@ -25,7 +25,7 @@ val exhibitorOptionalDependencies = Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
 ).map(_ % Provided)
 
-val curatorVersion = "2.12.0"
+val curatorVersion = "4.0.0"
 
 val zkDependencies = Seq(
   "curator-framework",
