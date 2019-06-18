@@ -2,7 +2,6 @@ package akka.cluster.seed
 
 import java.security.cert.X509Certificate
 import javax.net.ssl.{SSLContext, X509TrustManager}
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl._
 import akka.http.scaladsl.model.Uri.Path
@@ -12,10 +11,8 @@ import akka.util.{ByteString, Timeout}
 import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import spray.json.DefaultJsonProtocol._
 import spray.json.JsonParser
-
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
-import scala.language.postfixOps
 
 case class ExhibitorClient(system: ActorSystem, exhibitorUrl: String, requestPath: String, validateCerts: Boolean) extends Client {
 
@@ -75,9 +72,9 @@ object SSL {
 
   lazy val nonValidatingContext: SSLContext = {
     class IgnoreX509TrustManager extends X509TrustManager {
-      def checkClientTrusted(chain: Array[X509Certificate], authType: String) {}
+      def checkClientTrusted(chain: Array[X509Certificate], authType: String):Unit = {}
 
-      def checkServerTrusted(chain: Array[X509Certificate], authType: String) {}
+      def checkServerTrusted(chain: Array[X509Certificate], authType: String): Unit = {}
 
       def getAcceptedIssuers = null
     }
