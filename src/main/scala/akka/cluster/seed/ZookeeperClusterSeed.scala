@@ -1,7 +1,6 @@
 package akka.cluster.seed
 
 import java.io.Closeable
-
 import akka.actor._
 import akka.cluster.{AkkaCuratorClient, AutoDownUnresolvedStrategies, Cluster, ZookeeperClusterSeedSettings}
 import org.apache.curator.framework.CuratorFramework
@@ -9,7 +8,6 @@ import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildr
 import org.apache.curator.framework.recipes.leader.{LeaderLatch, LeaderLatchListener}
 import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.zookeeper.KeeperException.{NoNodeException, NodeExistsException}
-
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.collection.{immutable, mutable}
@@ -102,11 +100,11 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     def waitForLeaderChange(times: Int, delay: Int)
                            (removedAddress: String): Either[Unit, Unit] =
       latch.getLeader.getId.equals(removedAddress) match {
-        case false => Left(null)
+        case false => Left(())
         case _ if times > 0 =>
           Thread.sleep(delay)
           waitForLeaderChange(times - 1, delay)(removedAddress)
-        case _ => Right(null)
+        case _ => Right(())
       }
 
     val pathCache = new PathChildrenCache(client, path, true)
@@ -206,7 +204,7 @@ class ZookeeperClusterSeed(system: ExtendedActorSystem) extends Extension {
     }
   }
 
-  private def createPathIfNeeded() {
+  private def createPathIfNeeded(): Unit = {
     Option(client.checkExists().forPath(path)).getOrElse {
       try {
         client.create().creatingParentsIfNeeded().forPath(path)
